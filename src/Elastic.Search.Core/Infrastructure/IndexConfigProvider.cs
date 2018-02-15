@@ -25,7 +25,7 @@ namespace Elastic.Search.Core.Infrastructure
             if (string.IsNullOrWhiteSpace(clientIdFromHeader))
             {
                 //TODO: test values
-                string clientId = "sort_cprofile_nextgen";
+                string clientId = "cprofile_nextgen";
                 return clientId.ToLower();
             }
 
