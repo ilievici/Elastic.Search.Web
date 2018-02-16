@@ -35,7 +35,7 @@ namespace Elastic.Search.Core.Service
             foreach (var entity in payments)
             {
                 request.Index<Payment>(op => op
-                    .Id(entity.Id.ToString())
+                    .Id(entity.Confirmation.ToString())
                     .Index(_indexName)
                     .Document(entity)
                 );
@@ -47,7 +47,7 @@ namespace Elastic.Search.Core.Service
         /// <summary>
         /// Get entity by ID.
         /// </summary>
-        public async Task<Payment> GetById(Guid id)
+        public async Task<Payment> GetById(long id)
         {
             var response = await _elastic.GetAsync(new DocumentPath<Payment>(id), g => g
                 .Index(_indexName)
@@ -56,7 +56,7 @@ namespace Elastic.Search.Core.Service
 
             if (response.Source != null)
             {
-                response.Source.Id = id;
+                response.Source.Confirmation = id;
             }
 
             return response.Source;
@@ -67,7 +67,7 @@ namespace Elastic.Search.Core.Service
         /// </summary>
         public Task<IUpdateResponse<Payment>> Update(Payment payment)
         {
-            var response = _elastic.UpdateAsync<Payment>(payment.Id, descriptor => descriptor
+            var response = _elastic.UpdateAsync<Payment>(payment.Confirmation, descriptor => descriptor
                 .Index(_indexName)
                 .Doc(payment)
             );
@@ -90,7 +90,7 @@ namespace Elastic.Search.Core.Service
         /// <summary>
         /// Delete entity by ID
         /// </summary>
-        public async Task<IDeleteResponse> Delete(Guid id)
+        public async Task<IDeleteResponse> Delete(long id)
         {
             var response = await _elastic.DeleteAsync(new DocumentPath<Payment>(id), g => g
                 .Index(_indexName)

@@ -11,6 +11,7 @@ namespace Elastic.Search.Core.Infrastructure
     /// </summary>
     public class IndexConfigProvider : IIndexConfigProvider
     {
+        private readonly IConnectionProvider _connectionProvider;
         private readonly IElasticClient _elastic;
 
         private string IndexName => GetIndexName();
@@ -20,33 +21,21 @@ namespace Elastic.Search.Core.Infrastructure
         /// </summary>
         public string GetIndexName()
         {
-            var clientIdFromHeader = _httpContextAccessor.HttpContext.Request.Headers[Constants.CLIENT_ID];
-
-            if (string.IsNullOrWhiteSpace(clientIdFromHeader))
-            {
-                //TODO: test values
-                string clientId = "cprofile_nextgen";
-                return clientId.ToLower();
-            }
-
-            string value = clientIdFromHeader.ToString().ToLower();
-
-            if (string.IsNullOrWhiteSpace(clientIdFromHeader))
+            var id = _connectionProvider.GetClientId();
+            if (string.IsNullOrWhiteSpace(id))
             {
                 throw new ArgumentNullException("CLIENT_ID is missing");
             }
 
-            return value.ToLower();
+            return id.ToLower();
         }
-
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexConfigProvider"/> class.
         /// </summary>
-        public IndexConfigProvider(IHttpContextAccessor httpContextAccessor, IElasticClient elastic)
+        public IndexConfigProvider(IConnectionProvider connectionProvider, IElasticClient elastic)
         {
-            _httpContextAccessor = httpContextAccessor;
+            _connectionProvider = connectionProvider;
             _elastic = elastic;
         }
 

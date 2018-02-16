@@ -7,6 +7,7 @@ using Elastic.Search.Core.Infrastructure.Abstract;
 using Elastic.Search.Core.Models;
 using Elastic.Search.Core.Service;
 using Elastic.Search.Core.Service.Abstract;
+using Elastic.Search.Web.Infrastructure;
 using Elasticsearch.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -104,7 +105,7 @@ namespace Elastic.Search.Web
             });
 
             //WebAPI
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IConnectionProvider, ConnectionProvider>();
 
             //Core 
             services.AddScoped<IIndexConfigProvider, IndexConfigProvider>();

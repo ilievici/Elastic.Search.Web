@@ -19,12 +19,12 @@ namespace Elastic.Search.Core.Service.Abstract
         /// <summary>
         /// Delete entity by ID
         /// </summary>
-        Task<IDeleteResponse> Delete(Guid id);
+        Task<IDeleteResponse> Delete(long id);
 
         /// <summary>
         /// Get entity by ID.
         /// </summary>
-        Task<Payment> GetById(Guid id);
+        Task<Payment> GetById(long id);
 
         /// <summary>
         /// Update payment.

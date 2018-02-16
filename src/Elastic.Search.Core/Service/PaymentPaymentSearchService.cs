@@ -62,7 +62,7 @@ namespace Elastic.Search.Core.Service
         {
             Func<IHit<Payment>, Payment> func = x =>
             {
-                hit.Source.Id = Guid.Parse(hit.Id);
+                hit.Source.ElasticId = Guid.Parse(hit.Id);
                 return hit.Source;
             };
 
@@ -158,7 +158,7 @@ namespace Elastic.Search.Core.Service
             {
                 container &= new QueryContainerDescriptor<Payment>()
                     .QueryString(qs => qs
-                        .Fields(f => f.Field(payment => payment.Emails))
+                        .Fields(f => f.Field(payment => payment.Email))
                         .Query(filter.Email)
                     );
             }

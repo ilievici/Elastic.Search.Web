@@ -32,9 +32,9 @@ namespace Elastic.Search.Web.Controllers
         /// <summary>
         /// Obtain payment by ID
         /// </summary>
-        [HttpGet("[action]/{id:guid}")]
+        [HttpGet("[action]/{id}")]
         [Produces("application/json", Type = typeof(ResultModel))]
-        public async Task<JsonResult> GetById(Guid id)
+        public async Task<JsonResult> GetById(long id)
         {
             var response = new ResultModel();
             try
@@ -59,9 +59,9 @@ namespace Elastic.Search.Web.Controllers
         /// <summary>
         /// Delete the a specific payment.
         /// </summary>
-        [HttpDelete("[action]/{id:guid}")]
+        [HttpDelete("[action]/{id}")]
         [Produces("application/json", Type = typeof(ResultModel))]
-        public async Task<JsonResult> Delete(Guid id)
+        public async Task<JsonResult> Delete(long id)
         {
             var response = new ResultModel();
             try
@@ -182,22 +182,6 @@ namespace Elastic.Search.Web.Controllers
                         .Fill(s => s.Channel).WithRandom(new[] { "API", "INTERNET", "EXTRANET" })
                         .Fill(s => s.CardIssuer).WithRandom(new[] { "AmericanExpress", "VISA", "MasterCard", "Other" })
                         .Fill(s => s.IsAudit).WithRandom(new[] { false, false, true })
-                        .Fill(s => s.Emails).WithRandom(
-                            new[]
-                            {
-                                GenFu.GenFu.ListOf<EmailEntity>(1)
-                                    .Select(s => s.Email)
-                                    .ToList(),
-                                GenFu.GenFu.ListOf<EmailEntity>(3)
-                                    .Select(s => s.Email)
-                                    .ToList(),
-                                GenFu.GenFu.ListOf<EmailEntity>(2)
-                                    .Select(s => s.Email)
-                                    .ToList(),
-                                GenFu.GenFu.ListOf<EmailEntity>(2)
-                                    .Select(s => s.Email)
-                                    .ToList()
-                            })
                         .Fill(s => s.Phones).WithRandom(
                             new[]
                             {
