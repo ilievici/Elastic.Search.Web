@@ -7,7 +7,6 @@ using Elastic.Search.Core.Service;
 using Elastic.Search.Core.Service.Abstract;
 using Elastic.Search.Job.Infrastructure;
 using Elasticsearch.Net;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Nest;

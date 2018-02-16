@@ -7,9 +7,9 @@
     "host": "localhost",
     "port": 9201
   },
+  "scriptPath": "get_paymenets.sql", 
   "clientIds": [
     "cutexas_cprofile",
-    "cutexas_autopay",
-    "cutexasdev3_autopay"
+    "cutexas_autopay"
   ]
 }

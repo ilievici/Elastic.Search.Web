@@ -13,7 +13,6 @@ namespace Elastic.Search.Core.Models
             ElasticId = Guid.NewGuid();
         }
         
-        [Key]
         [Keyword]
         public long Confirmation { get; set; }
 

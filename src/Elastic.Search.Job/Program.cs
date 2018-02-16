@@ -37,6 +37,24 @@ namespace Elastic.Search.Job
                 return;
 
             var container = new Startup().BuildContainer(configuration);
+            
+            string sql;
+            try
+            {
+                var scriptPath = configuration.GetSection("scriptPath").Get<string>();
+                if (string.IsNullOrWhiteSpace(scriptPath))
+                    return;
+
+                sql = File.ReadAllText(scriptPath);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(sql))
+                return;
 
             foreach (var clientId in clientIds)
             {
@@ -46,7 +64,7 @@ namespace Elastic.Search.Job
                 {
                     try
                     {
-                        var payments = scope.Resolve<IPaymentsRepository>().GetPayments();
+                        var payments = scope.Resolve<IPaymentsRepository>().GetPayments(sql);
                         if (!payments.Any())
                         {
                             continue;
@@ -55,7 +73,7 @@ namespace Elastic.Search.Job
 
                         var indexConfigProvider = scope.Resolve<IIndexConfigProvider>();
                         var paymentService = scope.Resolve<IPaymentService>();
-                        
+
                         if (await indexConfigProvider.IndexExists())
                         {
                             await indexConfigProvider.DeleteIndex();

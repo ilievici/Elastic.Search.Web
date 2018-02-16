@@ -1,6 +1,5 @@
 cls
-echo off
 
-cd release
-
+cd %CD%\release
 dotnet Elastic.Search.Job.dll
+cd ..

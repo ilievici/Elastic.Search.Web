@@ -8,7 +8,7 @@ namespace Elastic.Search.Job
 {
     public interface IPaymentsRepository
     {
-        IList<Payment> GetPayments();
+        IList<Payment> GetPayments(string sql);
     }
 
     public class PaymentsRepository : IPaymentsRepository
@@ -20,12 +20,10 @@ namespace Elastic.Search.Job
             _connectionProvider = connectionProvider;
         }
 
-        public IList<Payment> GetPayments()
+        public IList<Payment> GetPayments(string sql)
         {
             using (var connection = _connectionProvider.OpenDbClientConnection())
             {
-                var sql = Properties.Resources.get_paymenets;
-
                 return connection.Query<Payment>(sql)
                     .ToList();
             }
