@@ -5,18 +5,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
-using Elastic.Search.Core.Infrastructure;
 using Elastic.Search.Core.Infrastructure.Abstract;
 using Elastic.Search.Core.Models;
-using Elastic.Search.Core.Service;
 using Elastic.Search.Core.Service.Abstract;
-using Elastic.Search.Job.Infrastructure;
-using Elasticsearch.Net;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features.Authentication;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Nest;
 
 namespace Elastic.Search.Job
 {

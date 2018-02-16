@@ -181,7 +181,7 @@ namespace Elastic.Search.Web.Controllers
                         .Fill(s => s.Color).WithRandom(new[] { "red", "black", "orange" })
                         .Fill(s => s.Channel).WithRandom(new[] { "API", "INTERNET", "EXTRANET" })
                         .Fill(s => s.CardIssuer).WithRandom(new[] { "AmericanExpress", "VISA", "MasterCard", "Other" })
-                        .Fill(s => s.IsAudit).WithRandom(new[] { false, false, true })
+                        .Fill(s => s.HasAuditDetails).WithRandom(new[] { false, false, true })
                         .Fill(s => s.Phones).WithRandom(
                             new[]
                             {

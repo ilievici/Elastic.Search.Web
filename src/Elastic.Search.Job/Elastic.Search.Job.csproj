@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Elastic.Search.Core\Elastic.Search.Core.csproj" />
+    <ProjectReference Include="..\Elastic.Search.Core\Elastic.Search.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

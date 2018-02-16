@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elastic.Search.Web", "src\E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elastic.Search.Core", "src\Elastic.Search.Core\Elastic.Search.Core.csproj", "{70AF1C1B-5C81-440A-A04A-A6E5D2EC88A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elastic.Search.Job", "Elastic.Search.Job\Elastic.Search.Job.csproj", "{87AE2A78-DF5A-4616-A699-50B491CC3838}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elastic.Search.Job", "src\Elastic.Search.Job\Elastic.Search.Job.csproj", "{87AE2A78-DF5A-4616-A699-50B491CC3838}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
