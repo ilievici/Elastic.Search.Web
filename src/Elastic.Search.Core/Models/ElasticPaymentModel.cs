@@ -3,16 +3,16 @@ using Nest;
 
 namespace Elastic.Search.Core.Models
 {
-    [ElasticsearchType(Name = "payments", IdProperty = nameof(Id))]
+    [ElasticsearchType(Name = "payments", IdProperty = nameof(ElasticId))]
     public class ElasticPaymentModel
     {
         public ElasticPaymentModel()
         {
-            Id = Guid.NewGuid();
+            ElasticId = Guid.NewGuid();
         }
 
         [Ignore]
-        public Guid Id { get; set; }
+        public Guid ElasticId { get; set; }
         
         [Ignore]
         public PaymentDateSearchType DateType { get; set; }
@@ -41,10 +41,10 @@ namespace Elastic.Search.Core.Models
         [Keyword]
         public string Color { get; set; }
 
-        [Keyword]
+        [Text(Analyzer = "lower_case")]
         public string FirstName { get; set; }
 
-        [Keyword]
+        [Text(Analyzer = "lower_case")]
         public string LastName { get; set; }
 
         [Keyword]

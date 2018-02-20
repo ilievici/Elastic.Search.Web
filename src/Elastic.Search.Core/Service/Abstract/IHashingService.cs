@@ -2,9 +2,7 @@
 {
     public interface IHashingService
     {
-        /// <summary>
-        /// Hash string
-        /// </summary>
-        string HashString(string inputkey);
+        string Encrypt(string clearText);
+        string Decrypt(string cipherText);
     }
 }

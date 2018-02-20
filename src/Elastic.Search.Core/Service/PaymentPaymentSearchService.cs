@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Elastic.Search.Core.Extensions;
 using Elastic.Search.Core.Infrastructure.Abstract;
 using Elastic.Search.Core.Models;
 using Elastic.Search.Core.Service.Abstract;
@@ -40,9 +41,11 @@ namespace Elastic.Search.Core.Service
         {
             ISearchResponse<ElasticPaymentModel> searchResults;
 
+            var settingsCollection = _securitySettingsService.GetSettings();
+
             if (filter.HasAnySearchConditions())
             {
-                var searchRequest = BuildSearchRequest(filter);
+                var searchRequest = BuildSearchRequest(filter, settingsCollection);
                 searchResults = await _elastic.SearchAsync<ElasticPaymentModel>(searchRequest);
             }
             else
@@ -57,7 +60,7 @@ namespace Elastic.Search.Core.Service
             }
 
             var data = searchResults.Hits
-                .Select(s => ConvertHitToCustumer(s, filter.DateType))
+                .Select(s => ConvertHitToCustumer(s, filter.DateType, settingsCollection))
                 .AsEnumerable();
 
             return new SearchResult<ElasticPaymentModel>
@@ -73,12 +76,16 @@ namespace Elastic.Search.Core.Service
         /// <summary>
         /// Anonymous method to translate from a Hit to <see cref="ElasticPaymentModel"/> 
         /// </summary>
-        private ElasticPaymentModel ConvertHitToCustumer(IHit<ElasticPaymentModel> hit, PaymentDateSearchType dateType)
+        private ElasticPaymentModel ConvertHitToCustumer(IHit<ElasticPaymentModel> hit, PaymentDateSearchType dateType, FiledSettingsCollection settingsCollection)
         {
             Func<IHit<ElasticPaymentModel>, ElasticPaymentModel> func = x =>
             {
-                hit.Source.Id = Guid.Parse(hit.Id);
+                hit.Source.ElasticId = Guid.Parse(hit.Id);
                 hit.Source.DateType = dateType;
+
+                hit.Source.CreditAccount = _hashingService.Decrypt(hit.Source.CreditAccount);
+                hit.Source.DebitAccount = _hashingService.Decrypt(hit.Source.DebitAccount);
+
                 return hit.Source;
             };
 
@@ -88,17 +95,15 @@ namespace Elastic.Search.Core.Service
         /// <summary>
         /// Builds the <see cref="SearchRequest{ElasticPaymentModel}"/>.
         /// </summary>
-        private SearchRequest<ElasticPaymentModel> BuildSearchRequest(PaymentFilterModel filter)
+        private SearchRequest<ElasticPaymentModel> BuildSearchRequest(PaymentFilterModel filter, FiledSettingsCollection settingsCollection)
         {
-            var collection = _securitySettingsService.GetSettings();
-
             var searchRequest = new SearchRequest<ElasticPaymentModel>(Indices.Parse(_indexName))
             {
                 From = filter.Page,
                 Size = filter.Take,
 
-                Sort = filter.BuildSort(collection),
-                Query = filter.BuildQuery(_hashingService, collection)
+                Sort = filter.BuildSort(settingsCollection),
+                Query = filter.BuildQuery(_hashingService, settingsCollection)
             };
 
             return searchRequest;

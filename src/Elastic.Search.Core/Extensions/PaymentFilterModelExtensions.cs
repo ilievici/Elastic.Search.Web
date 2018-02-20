@@ -1,60 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Elastic.Search.Core.Models;
 using Elastic.Search.Core.Service.Abstract;
 using Nest;
 
-namespace Elastic.Search.Core
+namespace Elastic.Search.Core.Extensions
 {
-    public class FiledSettings
-    {
-        public string Name { get; }
-
-        public bool Hashed { get; }
-
-        public bool ExactMatch { get; }
-
-        public bool Sortable { get; }
-
-        public FiledSettings(string fieldName, bool hashed, bool exactMatch)
-        {
-            Name = fieldName;
-            Hashed = hashed;
-            ExactMatch = exactMatch;
-        }
-    }
-
-    public class FiledSettingsCollection
-    {
-        private readonly IList<FiledSettings> _settings;
-
-        public FiledSettingsCollection(IList<FiledSettings> settings)
-        {
-            _settings = settings;
-        }
-
-        public bool IsExactMatch(string name)
-        {
-            var item = _settings.FirstOrDefault(s => s.Name == name);
-            return item == null || item.ExactMatch;
-        }
-
-        public bool IsHashed(string name)
-        {
-            var item = _settings.FirstOrDefault(s => s.Name == name);
-            return item == null || item.Hashed;
-        }
-
-        public bool AllowSort(string name)
-        {
-            var item = _settings.FirstOrDefault(s => s.Name == name);
-            return item == null || item.Sortable;
-        }
-    }
-
     public static class PaymentFilterModelExtensions
     {
         /// <summary>
@@ -181,9 +134,9 @@ namespace Elastic.Search.Core
             {
                 var searchValue = filter.CreditAccount;
 
-                if (settingsCollection.IsHashed(nameof(filter.CreditAccount)))
+                if (settingsCollection.IsCrypted(nameof(filter.CreditAccount)))
                 {
-                    searchValue = hashingService.HashString(filter.CreditAccount);
+                    searchValue = hashingService.Encrypt(filter.CreditAccount);
                 }
 
                 container &= new QueryContainerDescriptor<ElasticPaymentModel>()
@@ -197,9 +150,9 @@ namespace Elastic.Search.Core
             {
                 var searchValue = filter.DebitAccount;
 
-                if (settingsCollection.IsHashed(nameof(filter.DebitAccount)))
+                if (settingsCollection.IsCrypted(nameof(filter.DebitAccount)))
                 {
-                    searchValue = hashingService.HashString(filter.DebitAccount);
+                    searchValue = hashingService.Encrypt(filter.DebitAccount);
                 }
 
                 container &= new QueryContainerDescriptor<ElasticPaymentModel>()

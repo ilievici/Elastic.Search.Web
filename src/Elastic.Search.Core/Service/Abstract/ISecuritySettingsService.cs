@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using Elastic.Search.Core.Extensions;
 
 namespace Elastic.Search.Core.Service.Abstract
 {

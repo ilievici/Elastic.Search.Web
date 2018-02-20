@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Elastic.Search.Core.Extensions;
 using Elastic.Search.Core.Infrastructure.Abstract;
 using Elastic.Search.Core.Models;
 using Elastic.Search.Core.Service.Abstract;
@@ -37,12 +38,13 @@ namespace Elastic.Search.Core.Service
         /// <summary>
         /// Bulk payments insert
         /// </summary>
-        public Task<IBulkResponse> BulkInsert(IEnumerable<ElasticPaymentModel> payments)
+        public async Task<IBulkResponse> BulkInsert(IEnumerable<ElasticPaymentModel> payments)
         {
             var request = new BulkDescriptor();
 
             //TODO: just for demo
-            _indexConfigProvider.CreateIndex<ElasticPaymentModel>();
+            await _indexConfigProvider.DeleteIndex();
+            await _indexConfigProvider.CreateIndex<ElasticPaymentModel>();
 
             payments = DoHash(ref payments);
 
@@ -54,7 +56,7 @@ namespace Elastic.Search.Core.Service
                 );
             }
 
-            return _elastic.BulkAsync(request);
+            return await _elastic.BulkAsync(request);
         }
 
         /// <summary>
@@ -93,8 +95,6 @@ namespace Elastic.Search.Core.Service
         /// </summary>
         public async Task<long> Count()
         {
-            //_elastic.Refresh(_indexName);
-
             var response = await _elastic.CountAsync<ElasticPaymentModel>(new CountRequest(_indexName));
 
             return response.Count;
@@ -125,7 +125,7 @@ namespace Elastic.Search.Core.Service
         {
             foreach (var propertyInfo in typeof(T).GetProperties())
             {
-                if (!settingsCollection.IsHashed(nameof(propertyInfo.Name)))
+                if (!settingsCollection.IsCrypted(propertyInfo.Name))
                 {
                     continue;
                 }
@@ -142,7 +142,7 @@ namespace Elastic.Search.Core.Service
                             continue;
                         }
 
-                        var valueHash = _hashingService.HashString(str);
+                        var valueHash = _hashingService.Encrypt(str);
                         propertyInfo.SetValue(payment, valueHash);
                     }
                 }

@@ -51,11 +51,45 @@ namespace Elastic.Search.Core.Infrastructure
                 return null;
             }
 
+            var descriptor = new CreateIndexDescriptor(IndexName)
+                .Settings(t => t
+                    .NumberOfShards(1)
+                    .NumberOfReplicas(0)
+                )
+                .Mappings(ms => ms
+                    .Map<T>(m => m.AutoMap()
+                    )
+                );
+
+            return await _elastic.CreateIndexAsync(IndexName, d => descriptor);
+
+            /*
             return await _elastic
                 .CreateIndexAsync(IndexName, s => s
                     .Settings(t => t
                         .NumberOfShards(1)
                         .NumberOfReplicas(0)
+
+                        .Analysis(ar => ar
+                            .Analyzers(a => a
+                                .Custom("autocomplete", cc => cc
+                                    .Filters("eng_stopwords", "trim", "lowercase")
+                                    .Tokenizer("autocomplete")
+                                )
+                            )
+                            .Tokenizers(tdesc => tdesc
+                                .EdgeNGram("autocomplete", e => e
+                                    .MinGram(3)
+                                    .MaxGram(15)
+                                    .TokenChars(TokenChar.Letter, TokenChar.Digit)
+                                )
+                            )
+                            .TokenFilters(f => f
+                                .Stop("eng_stopwords", lang => lang
+                                    .StopWords("_english_")
+                                )
+                            )
+                        )
                     )
                     //.Settings(st => st
                     //    .NumberOfShards(1)
@@ -87,6 +121,7 @@ namespace Elastic.Search.Core.Infrastructure
                         )
                     )
                 );
+            */
         }
 
         /// <summary>
