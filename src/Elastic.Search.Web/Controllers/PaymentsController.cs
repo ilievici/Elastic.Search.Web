@@ -30,11 +30,11 @@ namespace Elastic.Search.Web.Controllers
         }
 
         /// <summary>
-        /// Obtain payment by ID
+        /// Obtain elasticPaymentModel by ID
         /// </summary>
         [HttpGet("[action]/{id}")]
         [Produces("application/json", Type = typeof(ResultModel))]
-        public async Task<JsonResult> GetById(long id)
+        public async Task<JsonResult> GetById(string id)
         {
             var response = new ResultModel();
             try
@@ -57,11 +57,11 @@ namespace Elastic.Search.Web.Controllers
         }
 
         /// <summary>
-        /// Delete the a specific payment.
+        /// Delete the a specific elasticPaymentModel.
         /// </summary>
         [HttpDelete("[action]/{id}")]
         [Produces("application/json", Type = typeof(ResultModel))]
-        public async Task<JsonResult> Delete(long id)
+        public async Task<JsonResult> Delete(string id)
         {
             var response = new ResultModel();
             try
@@ -84,17 +84,17 @@ namespace Elastic.Search.Web.Controllers
         }
 
         /// <summary>
-        /// Register a new payment.
+        /// Register a new elasticPaymentModel.
         /// </summary>
         [HttpPost("[action]")]
         [Produces("application/json", Type = typeof(ResultModel))]
-        public async Task<JsonResult> Create([FromBody, Required] Payment payment)
+        public async Task<JsonResult> Create([FromBody, Required] ElasticPaymentModel elasticPaymentModel)
         {
             var response = new ResultModel();
             try
             {
-                var model = await _paymentService.BulkInsert(new[] { payment });
-                _logger.LogInformation("Create", payment, model);
+                var model = await _paymentService.BulkInsert(new[] { elasticPaymentModel });
+                _logger.LogInformation("Create", elasticPaymentModel, model);
 
                 response.IsSuccess = true;
                 response.Result = model;
@@ -103,7 +103,7 @@ namespace Elastic.Search.Web.Controllers
             }
             catch (Exception exception)
             {
-                _logger.LogError("Create", payment, exception);
+                _logger.LogError("Create", elasticPaymentModel, exception);
                 response.IsSuccess = false;
                 response.Errors = new List<string> { exception.Message };
                 return Json(response);
@@ -115,7 +115,7 @@ namespace Elastic.Search.Web.Controllers
         /// </summary>
         [HttpPost("[action]")]
         [Produces("application/json", Type = typeof(ResultModel))]
-        public async Task<JsonResult> CreateList([FromBody, Required] List<Payment> payments)
+        public async Task<JsonResult> CreateList([FromBody, Required] List<ElasticPaymentModel> payments)
         {
             var response = new ResultModel();
             try
@@ -138,17 +138,17 @@ namespace Elastic.Search.Web.Controllers
         }
 
         /// <summary>
-        /// Update an existing payment
+        /// Update an existing elasticPaymentModel
         /// </summary>
         [HttpPut("[action]")]
         [Produces("application/json", Type = typeof(ResultModel))]
-        public async Task<JsonResult> Update([FromBody, Required] Payment payment)
+        public async Task<JsonResult> Update([FromBody, Required] ElasticPaymentModel elasticPaymentModel)
         {
             var response = new ResultModel();
             try
             {
-                await _paymentService.Update(payment);
-                _logger.LogInformation("Update", payment);
+                await _paymentService.Update(elasticPaymentModel);
+                _logger.LogInformation("Update", elasticPaymentModel);
 
                 response.IsSuccess = true;
                 response.Result = null;
@@ -157,7 +157,7 @@ namespace Elastic.Search.Web.Controllers
             }
             catch (Exception exception)
             {
-                _logger.LogError("Update", payment, exception);
+                _logger.LogError("Update", elasticPaymentModel, exception);
                 response.IsSuccess = false;
                 response.Errors = new List<string> { exception.Message };
                 return Json(response);
@@ -176,33 +176,19 @@ namespace Elastic.Search.Web.Controllers
             {
                 if (totalCount > 0)
                 {
-                    GenFu.GenFu.Configure<Payment>()
+                    GenFu.GenFu.Configure<ElasticPaymentModel>()
                         .Fill(s => s.PaymentType).WithRandom(new[] { "C", "A", "T", "B" })
                         .Fill(s => s.Color).WithRandom(new[] { "red", "black", "orange" })
                         .Fill(s => s.Channel).WithRandom(new[] { "API", "INTERNET", "EXTRANET" })
+                        .Fill(s => s.CollectorId).WithRandom(new[] { "API", "INTERNET", "EXTRANET" })
+                        .Fill(s => s.CreditSiteId).WithRandom(new[] { "CUTX", "FLET", "CUNY" })
+                        .Fill(s => s.Status).WithRandom(new[] { "Exported", "Refund - Pending", "Pending" , "Refund - Processed" , "Processed" })
                         .Fill(s => s.CardIssuer).WithRandom(new[] { "AmericanExpress", "VISA", "MasterCard", "Other" })
                         .Fill(s => s.HasAuditDetails).WithRandom(new[] { false, false, true })
-                        .Fill(s => s.Phones).WithRandom(
-                            new[]
-                            {
-                                GenFu.GenFu.ListOf<PhoneEntity>(2)
-                                    .Select(s => s.Phone)
-                                    .ToList(),
-                                GenFu.GenFu.ListOf<PhoneEntity>(3)
-                                    .Select(s => s.Phone)
-                                    .ToList(),
-                                GenFu.GenFu.ListOf<PhoneEntity>(2)
-                                    .Select(s => s.Phone)
-                                    .ToList(),
-                                GenFu.GenFu.ListOf<PhoneEntity>(2)
-                                    .Select(s => s.Phone)
-                                    .ToList(),
-                                GenFu.GenFu.ListOf<PhoneEntity>(2)
-                                    .Select(s => s.Phone)
-                                    .ToList()
-                            });
+                        .Fill(s => s.FeeAmount).WithinRange(0, 100)
+                        .Fill(s => s.Amount).WithinRange(0, 9000);
 
-                    var payments = GenFu.GenFu.ListOf<Payment>(totalCount);
+                    var payments = GenFu.GenFu.ListOf<ElasticPaymentModel>(totalCount);
 
                     var model = await _paymentService.BulkInsert(payments);
                     _logger.LogInformation("CreateRandom", payments, model);

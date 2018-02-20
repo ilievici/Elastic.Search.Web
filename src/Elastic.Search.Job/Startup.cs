@@ -61,6 +61,8 @@ namespace Elastic.Search.Job
             //Services
             services.AddScoped<IPaymentSearchService, PaymentSearchService>();
             services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IHashingService, HashingService>();
+            services.AddScoped<ISecuritySettingsService, SecuritySettingsService>();
 
             services.AddScoped<IPaymentsRepository, PaymentsRepository>();
 

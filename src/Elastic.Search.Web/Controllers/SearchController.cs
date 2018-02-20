@@ -31,7 +31,7 @@ namespace Elastic.Search.Web.Controllers
         /// </summary>
         [HttpGet("[action]")]
         [Produces("application/json", Type = typeof(ResultModel))]
-        public Task<JsonResult> Search([FromQuery] AdvancedSearchCriteria criteria)
+        public Task<JsonResult> Search([FromQuery] PaymentFilterModel criteria)
         {
             return DoSearch(criteria);
         }
@@ -41,12 +41,12 @@ namespace Elastic.Search.Web.Controllers
         /// </summary>
         [HttpPost("[action]")]
         [Produces("application/json", Type = typeof(ResultModel))]
-        public Task<JsonResult> SearchByBody([FromBody] AdvancedSearchCriteria criteria)
+        public Task<JsonResult> SearchByBody([FromBody] PaymentFilterModel criteria)
         {
             return DoSearch(criteria);
         }
 
-        private async Task<JsonResult> DoSearch(AdvancedSearchCriteria criteria)
+        private async Task<JsonResult> DoSearch(PaymentFilterModel criteria)
         {
             var response = new ResultModel();
 

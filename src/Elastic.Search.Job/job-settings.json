@@ -9,7 +9,6 @@
   },
   "scriptPath": "get_paymenets.sql", 
   "clientIds": [
-    "cutexas_cprofile",
-    "cutexas_autopay"
+    "cutexas_cprofile"
   ]
 }

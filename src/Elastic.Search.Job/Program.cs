@@ -79,7 +79,7 @@ namespace Elastic.Search.Job
                             await indexConfigProvider.DeleteIndex();
                         }
 
-                        await indexConfigProvider.CreateIndex<Payment>();
+                        await indexConfigProvider.CreateIndex<ElasticPaymentModel>();
                         await paymentService.BulkInsert(payments);
                     }
                     catch (Exception e)

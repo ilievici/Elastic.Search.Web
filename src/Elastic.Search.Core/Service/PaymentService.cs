@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Elastic.Search.Core.Infrastructure.Abstract;
@@ -9,33 +9,46 @@ using Nest;
 namespace Elastic.Search.Core.Service
 {
     /// <summary>
-    /// Payment service
+    /// ElasticPaymentModel service
     /// </summary>
     public class PaymentService : IPaymentService
     {
         private readonly IElasticClient _elastic;
+        private readonly IIndexConfigProvider _indexConfigProvider;
         private readonly string _indexName;
+        private readonly IHashingService _hashingService;
+        private readonly ISecuritySettingsService _securitySettingsService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PaymentService"/> class.
         /// </summary>
-        public PaymentService(IElasticClient elastic, IIndexConfigProvider indexConfigProvider)
+        public PaymentService(IElasticClient elastic,
+            IIndexConfigProvider indexConfigProvider,
+            IHashingService hashingService,
+            ISecuritySettingsService securitySettingsService)
         {
             _elastic = elastic;
+            _indexConfigProvider = indexConfigProvider;
             _indexName = indexConfigProvider.GetIndexName();
+            _hashingService = hashingService;
+            _securitySettingsService = securitySettingsService;
         }
 
         /// <summary>
         /// Bulk payments insert
         /// </summary>
-        public Task<IBulkResponse> BulkInsert(IEnumerable<Payment> payments)
+        public Task<IBulkResponse> BulkInsert(IEnumerable<ElasticPaymentModel> payments)
         {
             var request = new BulkDescriptor();
 
+            //TODO: just for demo
+            _indexConfigProvider.CreateIndex<ElasticPaymentModel>();
+
+            payments = DoHash(ref payments);
+
             foreach (var entity in payments)
             {
-                request.Index<Payment>(op => op
-                    .Id(entity.Confirmation.ToString())
+                request.Index<ElasticPaymentModel>(op => op
                     .Index(_indexName)
                     .Document(entity)
                 );
@@ -47,11 +60,11 @@ namespace Elastic.Search.Core.Service
         /// <summary>
         /// Get entity by ID.
         /// </summary>
-        public async Task<Payment> GetById(long id)
+        public async Task<ElasticPaymentModel> GetById(string id)
         {
-            var response = await _elastic.GetAsync(new DocumentPath<Payment>(id), g => g
+            var response = await _elastic.GetAsync(new DocumentPath<ElasticPaymentModel>(id), g => g
                 .Index(_indexName)
-                .Type(typeof(Payment))
+                .Type(typeof(ElasticPaymentModel))
             );
 
             if (response.Source != null)
@@ -63,13 +76,13 @@ namespace Elastic.Search.Core.Service
         }
 
         /// <summary>
-        /// Update payment.
+        /// Update elasticPaymentModel.
         /// </summary>
-        public Task<IUpdateResponse<Payment>> Update(Payment payment)
+        public Task<IUpdateResponse<ElasticPaymentModel>> Update(ElasticPaymentModel elasticPaymentModel)
         {
-            var response = _elastic.UpdateAsync<Payment>(payment.Confirmation, descriptor => descriptor
+            var response = _elastic.UpdateAsync<ElasticPaymentModel>(elasticPaymentModel.Confirmation, descriptor => descriptor
                 .Index(_indexName)
-                .Doc(payment)
+                .Doc(elasticPaymentModel)
             );
 
             return response;
@@ -82,7 +95,7 @@ namespace Elastic.Search.Core.Service
         {
             //_elastic.Refresh(_indexName);
 
-            var response = await _elastic.CountAsync<Payment>(new CountRequest(_indexName));
+            var response = await _elastic.CountAsync<ElasticPaymentModel>(new CountRequest(_indexName));
 
             return response.Count;
         }
@@ -90,13 +103,52 @@ namespace Elastic.Search.Core.Service
         /// <summary>
         /// Delete entity by ID
         /// </summary>
-        public async Task<IDeleteResponse> Delete(long id)
+        public async Task<IDeleteResponse> Delete(string id)
         {
-            var response = await _elastic.DeleteAsync(new DocumentPath<Payment>(id), g => g
+            var response = await _elastic.DeleteAsync(new DocumentPath<ElasticPaymentModel>(id), g => g
                 .Index(_indexName)
-                .Type(typeof(Payment))
+                .Type(typeof(ElasticPaymentModel))
             );
             return response;
+        }
+
+        private IEnumerable<ElasticPaymentModel> DoHash(ref IEnumerable<ElasticPaymentModel> payments)
+        {
+            var settingsCollection = _securitySettingsService.GetSettings();
+
+            return payments
+                .Select(s => Hash(s, settingsCollection))
+                .ToList();
+        }
+
+        private T Hash<T>(T payment, FiledSettingsCollection settingsCollection)
+        {
+            foreach (var propertyInfo in typeof(T).GetProperties())
+            {
+                if (!settingsCollection.IsHashed(nameof(propertyInfo.Name)))
+                {
+                    continue;
+                }
+
+                var value = propertyInfo.GetValue(payment);
+                if (value != null)
+                {
+                    if (propertyInfo.PropertyType == typeof(string))
+                    {
+                        var str = (string)value;
+
+                        if (string.IsNullOrWhiteSpace(str))
+                        {
+                            continue;
+                        }
+
+                        var valueHash = _hashingService.HashString(str);
+                        propertyInfo.SetValue(payment, valueHash);
+                    }
+                }
+            }
+
+            return payment;
         }
     }
 }

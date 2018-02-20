@@ -14,22 +14,22 @@ namespace Elastic.Search.Core.Service.Abstract
         /// <summary>
         /// Bulk payments insert.
         /// </summary>
-        Task<IBulkResponse> BulkInsert(IEnumerable<Payment> payments);
+        Task<IBulkResponse> BulkInsert(IEnumerable<ElasticPaymentModel> payments);
 
         /// <summary>
         /// Delete entity by ID
         /// </summary>
-        Task<IDeleteResponse> Delete(long id);
+        Task<IDeleteResponse> Delete(string id);
 
         /// <summary>
         /// Get entity by ID.
         /// </summary>
-        Task<Payment> GetById(long id);
+        Task<ElasticPaymentModel> GetById(string id);
 
         /// <summary>
-        /// Update payment.
+        /// Update elasticPaymentModel.
         /// </summary>
-        Task<IUpdateResponse<Payment>> Update(Payment payment);
+        Task<IUpdateResponse<ElasticPaymentModel>> Update(ElasticPaymentModel elasticPaymentModel);
 
         /// <summary>
         /// Gets total count of payments

@@ -1,23 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using Nest;
 
 namespace Elastic.Search.Core.Models
 {
     [ElasticsearchType(Name = "payments", IdProperty = nameof(Id))]
-    public class Payment
+    public class ElasticPaymentModel
     {
-        public Payment()
+        public ElasticPaymentModel()
         {
-            ElasticId = Guid.NewGuid();
+            Id = Guid.NewGuid();
         }
-        
-        [Keyword]
-        public long Confirmation { get; set; }
 
         [Ignore]
-        public Guid ElasticId { get; set; }
+        public Guid Id { get; set; }
+        
+        [Ignore]
+        public PaymentDateSearchType DateType { get; set; }
+
+        [Keyword]
+        public string Confirmation { get; set; }
 
         [Text]
         public string PaymentType { get; set; }
@@ -54,51 +55,14 @@ namespace Elastic.Search.Core.Models
 
         [Keyword]
         public string DebitAccount { get; set; }
-
-        public string Email { get; set; }
-
-        public List<string> Phones
-        {
-            get
-            {
-                var list = new List<string>();
-                if (string.IsNullOrWhiteSpace(PhoneOne))
-                {
-                    list.Add(PhoneOne);
-                }
-                if (string.IsNullOrWhiteSpace(PhoneTwo))
-                {
-                    list.Add(PhoneTwo);
-                }
-
-                return list;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    PhoneOne = null;
-                    PhoneTwo = null;
-                    return;
-                }
-
-                if (value.Count == 1)
-                {
-                    PhoneOne = value[0];
-                    PhoneTwo = null;
-                    return;
-                }
-
-                if (value.Count >= 2)
-                {
-                    PhoneOne = value[0];
-                    PhoneTwo = value[1];
-                }
-            }
-        }
         
+        [Text(Analyzer = "ngram_tokenizer")]
+        public string Email { get; set; }
+        
+        [Keyword]
         public string PhoneOne { get; set; }
-
+        
+        [Keyword]
         public string PhoneTwo { get; set; }
         
         [Date]
@@ -112,5 +76,11 @@ namespace Elastic.Search.Core.Models
 
         [Boolean]
         public bool HasAuditDetails { get; set; }
+
+        [Keyword]
+        public string CollectorId { get; set; }
+
+        [Keyword]
+        public string CreditSiteId { get; set; }
     }
 }

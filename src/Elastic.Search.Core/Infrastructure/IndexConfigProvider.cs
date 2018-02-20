@@ -57,6 +57,30 @@ namespace Elastic.Search.Core.Infrastructure
                         .NumberOfShards(1)
                         .NumberOfReplicas(0)
                     )
+                    //.Settings(st => st
+                    //    .NumberOfShards(1)
+                    //    .NumberOfReplicas(0)
+                    //    .Analysis(an => an
+                    //        .Analyzers(anz => anz
+                    //            .Custom("ngram_analyzer", cc => cc
+                    //                    .Tokenizer("ngram_tokenizer")
+                    //                //.Filters(nGramFilters)
+                    //            )
+                    //        )
+                    //        .Tokenizers(tz => tz
+                    //            .NGram("ngram_tokenizer", td => td
+                    //                .MinGram(2)
+                    //                .MaxGram(20)
+                    //                .TokenChars(
+                    //                    TokenChar.Letter,
+                    //                    TokenChar.Digit,
+                    //                    TokenChar.Punctuation,
+                    //                    TokenChar.Symbol
+                    //                )
+                    //            )
+                    //        )
+                    //    )
+                    //)
                     .Mappings(m => m
                         .Map<T>(d => d
                             .AutoMap()

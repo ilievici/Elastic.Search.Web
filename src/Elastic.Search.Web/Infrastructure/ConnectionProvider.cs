@@ -13,7 +13,7 @@ namespace Elastic.Search.Web.Infrastructure
         public string GetClientId()
         { 
             //TODO: test values
-            string clientId = "cprofile_nextgen";
+            string clientId = "cutexas_cprofile";
             return clientId.ToLower();
         }
     }

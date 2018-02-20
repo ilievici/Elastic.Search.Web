@@ -113,6 +113,8 @@ namespace Elastic.Search.Web
             //Services
             services.AddScoped<IPaymentSearchService, PaymentSearchService>();
             services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IHashingService, HashingService>();
+            services.AddScoped<ISecuritySettingsService, SecuritySettingsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -137,7 +139,7 @@ namespace Elastic.Search.Web
             app.UseSwagger()
                 .UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Payment Search API v1.0");
+                    c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "ElasticPaymentModel Search API v1.0");
 
                     c.BooleanValues(new object[] { 0, 1 });
                     c.DocExpansion("none");
