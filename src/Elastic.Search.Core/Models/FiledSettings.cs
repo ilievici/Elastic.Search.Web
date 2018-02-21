@@ -10,12 +10,15 @@
 
         public bool Sortable { get; }
 
-        public FiledSettings(string fieldName, bool crypted, bool exactMatch, bool sortable = true)
+        public bool OutputField { get; }
+
+        public FiledSettings(string fieldName, bool crypted, bool exactMatch, bool sortable = true, bool outputField = true)
         {
             Name = fieldName;
             Crypted = crypted;
             ExactMatch = exactMatch;
             Sortable = sortable;
+            OutputField = outputField;
         }
     }
 }

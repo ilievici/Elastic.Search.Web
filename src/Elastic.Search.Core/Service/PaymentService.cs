@@ -40,11 +40,12 @@ namespace Elastic.Search.Core.Service
         /// </summary>
         public async Task<IBulkResponse> BulkInsert(IEnumerable<ElasticPaymentModel> payments)
         {
-            var request = new BulkDescriptor();
+            if (!await _indexConfigProvider.IndexExists())
+            {
+                await _indexConfigProvider.CreateIndex<ElasticPaymentModel>();
+            }
 
-            //TODO: just for demo
-            await _indexConfigProvider.DeleteIndex();
-            await _indexConfigProvider.CreateIndex<ElasticPaymentModel>();
+            var request = new BulkDescriptor();
 
             payments = DoHash(ref payments);
 

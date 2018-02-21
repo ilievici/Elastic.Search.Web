@@ -8,15 +8,22 @@ namespace Elastic.Search.Core.Service
 {
     public class HashingService : IHashingService
     {
+        private readonly ISecuritySettingsService _securitySettingsService;
+
+        public HashingService(ISecuritySettingsService securitySettingsService)
+        {
+            _securitySettingsService = securitySettingsService;
+        }
+
         public string Encrypt(string clearText)
         {
-            var encryptionKey = "abc123";
+            var encryptionKey = _securitySettingsService.GetEncryptionKey();
             return EncryptionHelper.Encrypt(clearText, encryptionKey);
         }
 
         public string Decrypt(string cipherText)
         {
-            var encryptionKey = "abc123";
+            var encryptionKey = _securitySettingsService.GetEncryptionKey();
             return EncryptionHelper.Decrypt(cipherText, encryptionKey);
         }
     }
