@@ -1,24 +1,17 @@
 ﻿using System;
+using Elastic.Search.Core.Extensions;
 using Nest;
 
 namespace Elastic.Search.Core.Models
 {
-    [ElasticsearchType(Name = "payments", IdProperty = nameof(ElasticId))]
+    [ElasticsearchType(Name = "payments", IdProperty = nameof(Confirmation))]
     public class ElasticPaymentModel
     {
-        public ElasticPaymentModel()
-        {
-            ElasticId = Guid.NewGuid();
-        }
+        [Keyword]
+        public int Confirmation { get; set; }
 
-        [Ignore]
-        public Guid ElasticId { get; set; }
-        
         [Ignore]
         public PaymentDateSearchType DateType { get; set; }
-
-        [Keyword]
-        public string Confirmation { get; set; }
 
         [Text]
         public string PaymentType { get; set; }
@@ -41,10 +34,10 @@ namespace Elastic.Search.Core.Models
         [Keyword]
         public string Color { get; set; }
 
-        [Text(Analyzer = "lower_case")]
+        [Text]
         public string FirstName { get; set; }
 
-        [Text(Analyzer = "lower_case")]
+        [Text]
         public string LastName { get; set; }
 
         [Keyword]
@@ -56,7 +49,7 @@ namespace Elastic.Search.Core.Models
         [Keyword]
         public string DebitAccount { get; set; }
         
-        [Text(Analyzer = "ngram_tokenizer")]
+        [Text]
         public string Email { get; set; }
         
         [Keyword]
@@ -82,5 +75,8 @@ namespace Elastic.Search.Core.Models
 
         [Keyword]
         public string CreditSiteId { get; set; }
+        
+        [Text(Index = false)]
+        public string HashValue => this.GetMd5Hash();
     }
 }

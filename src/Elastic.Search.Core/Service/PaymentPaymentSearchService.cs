@@ -60,7 +60,7 @@ namespace Elastic.Search.Core.Service
             }
 
             var data = searchResults.Hits
-                .Select(s => ConvertHitToCustumer(s, filter.DateType, settingsCollection))
+                .Select(s => ConvertHitToCustumer(s, filter.DateType))
                 .AsEnumerable();
 
             return new SearchResult<ElasticPaymentModel>
@@ -72,15 +72,14 @@ namespace Elastic.Search.Core.Service
                 ElapsedMilliseconds = searchResults.Took
             };
         }
-        
+
         /// <summary>
         /// Anonymous method to translate from a Hit to <see cref="ElasticPaymentModel"/> 
         /// </summary>
-        private ElasticPaymentModel ConvertHitToCustumer(IHit<ElasticPaymentModel> hit, PaymentDateSearchType dateType, FiledSettingsCollection settingsCollection)
+        private ElasticPaymentModel ConvertHitToCustumer(IHit<ElasticPaymentModel> hit, PaymentDateSearchType dateType)
         {
             Func<IHit<ElasticPaymentModel>, ElasticPaymentModel> func = x =>
             {
-                hit.Source.ElasticId = Guid.Parse(hit.Id);
                 hit.Source.DateType = dateType;
 
                 hit.Source.CreditAccount = _hashingService.Decrypt(hit.Source.CreditAccount);

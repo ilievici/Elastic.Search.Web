@@ -18,12 +18,12 @@ namespace Elastic.Search.Core.Service.Abstract
         /// <summary>
         /// Delete entity by ID
         /// </summary>
-        Task<IDeleteResponse> Delete(string id);
+        Task<IDeleteResponse> Delete(int id);
 
         /// <summary>
         /// Get entity by ID.
         /// </summary>
-        Task<ElasticPaymentModel> GetById(string id);
+        Task<ElasticPaymentModel> GetById(int id);
 
         /// <summary>
         /// Update elasticPaymentModel.
@@ -38,6 +38,6 @@ namespace Elastic.Search.Core.Service.Abstract
         /// <summary>
         /// Gets MAX payment ID
         /// </summary>
-        Task<string> GetMaxPaymentId();
+        Task<int> GetMaxPaymentId();
     }
 }

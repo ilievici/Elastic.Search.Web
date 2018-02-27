@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
@@ -16,13 +14,16 @@ namespace Elastic.Search.Job
     {
         static void Main(string[] args)
         {
-            Dojob().Wait();
+            //TODO: read options fro args
+            string clientId = "cutexas_autopay";
+
+            BuildIndex(clientId).Wait();
 
             Console.WriteLine("Done!");
             Thread.Sleep(5000);
         }
 
-        static async Task Dojob()
+        static async Task BuildIndex(string clientId)
         {
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -30,11 +31,8 @@ namespace Elastic.Search.Job
                 .AddEnvironmentVariables()
                 .Build();
 
-            var clientIds = configuration.GetSection("clientIds")
-                .Get<List<string>>();
-
-            if (!clientIds.Any())
-                return;
+            var batchRows = configuration.GetSection("batchRows")
+                .Get<int>();
 
             var container = new Startup().BuildContainer(configuration);
 
@@ -56,65 +54,53 @@ namespace Elastic.Search.Job
             if (string.IsNullOrWhiteSpace(sql))
                 return;
 
-            var batchRows = configuration.GetSection("batchRows")
-                .Get<int>();
+            Console.WriteLine($"CLEINT: {clientId}");
 
-            foreach (var clientId in clientIds)
+            using (var scope = container.BeginLifetimeScopeForClient(clientId))
             {
-                Console.WriteLine($"CLEINT: {clientId}");
+                var indexConfigProvider = scope.Resolve<IIndexConfigProvider>();
+                var paymentService = scope.Resolve<IPaymentService>();
 
-                using (var scope = container.BeginLifetimeScopeForClient(clientId))
+                if (!await indexConfigProvider.IndexExists())
                 {
-                    var indexConfigProvider = scope.Resolve<IIndexConfigProvider>();
-                    var paymentService = scope.Resolve<IPaymentService>();
+                    await indexConfigProvider.CreateIndex<ElasticPaymentModel>();
+                }
 
-                    if (!await indexConfigProvider.IndexExists())
+                try
+                {
+                    var repository = scope.Resolve<IPaymentsRepository>();
+
+                    var lastPaymentId = await paymentService.GetMaxPaymentId();
+
+                    int startRow = 0;
+                    int endRow = batchRows;
+                    int totalLeft = repository.GetTotalPayments(lastPaymentId);
+
+                    do
                     {
-                        await indexConfigProvider.CreateIndex<ElasticPaymentModel>();
-                    }
+                        var payments = repository.GetPayments(sql, startRow, endRow, lastPaymentId);
 
-                    try
-                    {
-                        var repository = scope.Resolve<IPaymentsRepository>();
+                        startRow = endRow;
+                        endRow += batchRows;
 
-                        
-                        int lastPaymentId = 0;
-                        var maxPaymentStr = await paymentService.GetMaxPaymentId();
-                        if (!string.IsNullOrWhiteSpace(maxPaymentStr))
+                        if (endRow > totalLeft)
                         {
-                            int.TryParse(maxPaymentStr, out lastPaymentId);
+                            endRow = totalLeft;
                         }
 
-                        int startRow = 0;
-                        int endRow = batchRows;
-                        int totalLeft = repository.GetTotalPayments(lastPaymentId);
-
-                        do
+                        if (payments.Count == 0)
                         {
-                            var payments = repository.GetPayments(sql, startRow, endRow, lastPaymentId);
+                            break;
+                        }
 
-                            startRow = endRow;
-                            endRow += batchRows;
-
-                            if (endRow > totalLeft)
-                            {
-                                endRow = totalLeft;
-                            }
-
-                            if (payments.Count == 0)
-                            {
-                                break;
-                            }
-
-                            Console.Title = (totalLeft - endRow).ToString();
-                            Console.WriteLine($" TOTAL PAYMENTS: {payments.Count}");
-                            paymentService.BulkInsert(payments);
-                        } while (endRow <= totalLeft);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
+                        Console.Title = (totalLeft - endRow).ToString();
+                        Console.WriteLine($" TOTAL PAYMENTS: {payments.Count}");
+                        paymentService.BulkInsert(payments);
+                    } while (endRow <= totalLeft);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
                 }
             }
         }

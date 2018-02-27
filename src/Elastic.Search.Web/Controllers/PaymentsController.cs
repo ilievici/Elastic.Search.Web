@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
 using Elastic.Search.Core.Models;
 using Elastic.Search.Core.Service.Abstract;
-using Elastic.Search.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -32,9 +30,9 @@ namespace Elastic.Search.Web.Controllers
         /// <summary>
         /// Obtain elasticPaymentModel by ID
         /// </summary>
-        [HttpGet("[action]/{id}")]
+        [HttpGet("[action]/{id:int}")]
         [Produces("application/json", Type = typeof(ResultModel))]
-        public async Task<JsonResult> GetById(string id)
+        public async Task<JsonResult> GetById(int id)
         {
             var response = new ResultModel();
             try
@@ -59,9 +57,9 @@ namespace Elastic.Search.Web.Controllers
         /// <summary>
         /// Delete the a specific elasticPaymentModel.
         /// </summary>
-        [HttpDelete("[action]/{id}")]
+        [HttpDelete("[action]/{id:int}")]
         [Produces("application/json", Type = typeof(ResultModel))]
-        public async Task<JsonResult> Delete(string id)
+        public async Task<JsonResult> Delete(int id)
         {
             var response = new ResultModel();
             try

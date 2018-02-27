@@ -63,7 +63,7 @@ namespace Elastic.Search.Core.Service
         /// <summary>
         /// Get entity by ID.
         /// </summary>
-        public async Task<ElasticPaymentModel> GetById(string id)
+        public async Task<ElasticPaymentModel> GetById(int id)
         {
             var response = await _elastic.GetAsync(new DocumentPath<ElasticPaymentModel>(id), g => g
                 .Index(_indexName)
@@ -104,7 +104,7 @@ namespace Elastic.Search.Core.Service
         /// <summary>
         /// Gets MAX payment ID
         /// </summary>
-        public async Task<string> GetMaxPaymentId()
+        public async Task<int> GetMaxPaymentId()
         {
             var searchResults = await _elastic.SearchAsync<ElasticPaymentModel>(s => s
                 .Index(_indexName)
@@ -121,13 +121,18 @@ namespace Elastic.Search.Core.Service
             );
 
             var itm = searchResults.Documents.FirstOrDefault();
-            return itm?.Confirmation;
+            if (itm == null)
+            {
+                return 0;
+            }
+
+            return itm.Confirmation;
         }
 
         /// <summary>
         /// Delete entity by ID
         /// </summary>
-        public async Task<IDeleteResponse> Delete(string id)
+        public async Task<IDeleteResponse> Delete(int id)
         {
             var response = await _elastic.DeleteAsync(new DocumentPath<ElasticPaymentModel>(id), g => g
                 .Index(_indexName)
