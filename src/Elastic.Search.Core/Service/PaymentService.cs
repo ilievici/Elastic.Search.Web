@@ -47,7 +47,7 @@ namespace Elastic.Search.Core.Service
 
             var request = new BulkDescriptor();
 
-            payments = DoHash(ref payments);
+            //payments = DoHash(ref payments);
 
             foreach (var entity in payments)
             {
@@ -99,6 +99,29 @@ namespace Elastic.Search.Core.Service
             var response = await _elastic.CountAsync<ElasticPaymentModel>(new CountRequest(_indexName));
 
             return response.Count;
+        }
+
+        /// <summary>
+        /// Gets MAX payment ID
+        /// </summary>
+        public async Task<string> GetMaxPaymentId()
+        {
+            var searchResults = await _elastic.SearchAsync<ElasticPaymentModel>(s => s
+                .Index(_indexName)
+                .From(0)
+                .Size(1)
+                .Query(f => f
+                    .MatchAll()
+                )
+                .Sort(df => df
+                    .Descending(d => d
+                        .Confirmation.Suffix("keyword")
+                    )
+                )
+            );
+
+            var itm = searchResults.Documents.FirstOrDefault();
+            return itm?.Confirmation;
         }
 
         /// <summary>

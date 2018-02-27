@@ -8,6 +8,7 @@
     "port": 9201
   },
   "scriptPath": "get_paymenets.sql", 
+  "batchRows": 15000,
   "clientIds": [
     "cutexas_cprofile"
   ]

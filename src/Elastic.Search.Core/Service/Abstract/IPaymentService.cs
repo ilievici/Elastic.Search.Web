@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Elastic.Search.Core.Models;
 using Nest;
@@ -35,5 +34,10 @@ namespace Elastic.Search.Core.Service.Abstract
         /// Gets total count of payments
         /// </summary>
         Task<long> Count();
+
+        /// <summary>
+        /// Gets MAX payment ID
+        /// </summary>
+        Task<string> GetMaxPaymentId();
     }
 }

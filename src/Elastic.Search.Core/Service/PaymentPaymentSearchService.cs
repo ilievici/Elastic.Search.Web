@@ -72,7 +72,7 @@ namespace Elastic.Search.Core.Service
                 ElapsedMilliseconds = searchResults.Took
             };
         }
-
+        
         /// <summary>
         /// Anonymous method to translate from a Hit to <see cref="ElasticPaymentModel"/> 
         /// </summary>

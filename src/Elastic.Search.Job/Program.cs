@@ -37,7 +37,7 @@ namespace Elastic.Search.Job
                 return;
 
             var container = new Startup().BuildContainer(configuration);
-            
+
             string sql;
             try
             {
@@ -56,31 +56,60 @@ namespace Elastic.Search.Job
             if (string.IsNullOrWhiteSpace(sql))
                 return;
 
+            var batchRows = configuration.GetSection("batchRows")
+                .Get<int>();
+
             foreach (var clientId in clientIds)
             {
                 Console.WriteLine($"CLEINT: {clientId}");
 
                 using (var scope = container.BeginLifetimeScopeForClient(clientId))
                 {
+                    var indexConfigProvider = scope.Resolve<IIndexConfigProvider>();
+                    var paymentService = scope.Resolve<IPaymentService>();
+
+                    if (!await indexConfigProvider.IndexExists())
+                    {
+                        await indexConfigProvider.CreateIndex<ElasticPaymentModel>();
+                    }
+
                     try
                     {
-                        var payments = scope.Resolve<IPaymentsRepository>().GetPayments(sql);
-                        if (!payments.Any())
-                        {
-                            continue;
-                        }
-                        Console.WriteLine($" TOTAL PAYMENTS: {payments.Count}");
+                        var repository = scope.Resolve<IPaymentsRepository>();
 
-                        var indexConfigProvider = scope.Resolve<IIndexConfigProvider>();
-                        var paymentService = scope.Resolve<IPaymentService>();
-
-                        if (await indexConfigProvider.IndexExists())
+                        
+                        int lastPaymentId = 0;
+                        var maxPaymentStr = await paymentService.GetMaxPaymentId();
+                        if (!string.IsNullOrWhiteSpace(maxPaymentStr))
                         {
-                            await indexConfigProvider.DeleteIndex();
+                            int.TryParse(maxPaymentStr, out lastPaymentId);
                         }
 
-                        await indexConfigProvider.CreateIndex<ElasticPaymentModel>();
-                        await paymentService.BulkInsert(payments);
+                        int startRow = 0;
+                        int endRow = batchRows;
+                        int totalLeft = repository.GetTotalPayments(lastPaymentId);
+
+                        do
+                        {
+                            var payments = repository.GetPayments(sql, startRow, endRow, lastPaymentId);
+
+                            startRow = endRow;
+                            endRow += batchRows;
+
+                            if (endRow > totalLeft)
+                            {
+                                endRow = totalLeft;
+                            }
+
+                            if (payments.Count == 0)
+                            {
+                                break;
+                            }
+
+                            Console.Title = (totalLeft - endRow).ToString();
+                            Console.WriteLine($" TOTAL PAYMENTS: {payments.Count}");
+                            paymentService.BulkInsert(payments);
+                        } while (endRow <= totalLeft);
                     }
                     catch (Exception e)
                     {
